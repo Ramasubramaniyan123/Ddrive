@@ -1,0 +1,47 @@
+📘 JDBC Masterclass – Topic List
+
+What is JDBC?
+Why JDBC?
+JDBC Architecture
+Four Main JDBC Components
+JDBC Driver Types
+Two-Tier Architecture
+Three-Tier Architecture
+Core JDBC Interfaces
+Loading JDBC Driver
+Creating Database Connection
+Statement Interface (Basic)
+Statement Usage
+PreparedStatement Interface
+PreparedStatement Usage
+CallableStatement Interface
+Sample Stored Procedure
+CallableStatement Usage
+ResultSet Interface
+ResultSet Data Retrieval
+SELECT Statement
+INSERT Statement
+UPDATE Statement
+DELETE Statement
+CRUD Operations
+Exception Handling in JDBC
+Try-Catch-Finally Pattern
+Try-With-Resources (Java 7+)
+Transaction Management
+Disabling AutoCommit
+Commit and Rollback
+Transaction Example
+Transaction Isolation Levels
+Setting Isolation Level
+Batch Operations
+Batch Operations Example
+DatabaseMetaData
+DatabaseMetaData Usage
+Connection Pooling
+Why Connection Pooling?
+Best Practices (1/2)
+Best Practices (2/2)
+Common Mistakes
+JDBC vs ORM Frameworks
+Real-World: Employee Management
+Key Takeaways
