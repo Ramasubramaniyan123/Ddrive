@@ -1,0 +1,286 @@
+// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+    import java.io.FileReader;
+    import java.io.IOException;
+    
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Try programiz.pro");
+        
+        ExceptionHandlingDemo demo = new ExceptionHandlingDemo();
+        // demo.demoMethod6();
+        
+    }
+}
+
+
+class ExceptionHandlingDemo{
+    
+    public void demoMethod1(){
+        System.out.println("This is demo method #1.");
+        
+        int num1 = 10, num2 = 2;
+        int num3 = num1/num2;
+        System.out.println("The result is:" + num3);
+        
+    }
+    
+    public void demoMethod2(){
+        System.out.println("This is demo method #2.");
+        
+        int num1 = 10, num2 = 0;
+        int num3 = num1/num2;
+        System.out.println("The result is:" + num3);
+        
+    }
+    
+    public void demoMethod3(){
+        System.out.println("This is demo method #3.");
+        
+        int num1 = 10, num2 = 0;
+        try{
+            int num3 = num1/num2;
+            System.out.println("The result is:" + num3);
+        }catch(ArithmeticException e){
+            System.out.println("Division by Zero is not feasible.");
+        }
+    }
+    
+    public void demoMethod4(){
+        System.out.println("This is demo method #4.");
+        
+        // String fileName1 = "c:\\Prakash\\nonExistentFile.txt";
+        // String fileName2 = "c:\\Prakash\\existentFile.txt";
+        
+        //  FileReader reader = new FileReader(fileName1);
+        //  FileReader reader = new FileReader(fileName2);
+    }
+    
+    public void demoMethod5(){
+        System.out.println("This is demo method #5.");
+        String fileName1 = "c:\\Prakash\\nonExistentFile.txt";
+        String fileName2 = "c:\\Prakash\\existentFile.txt";
+        
+        try {
+            FileReader reader = new FileReader(fileName1);
+            // FileReader reader = new FileReader(fileName2);
+            
+                // Further operations with reader
+                reader.close();
+            } catch (IOException e) {
+                System.out.println("An I/O error occurred: " + e.getMessage());
+                // You can log the error, prompt the user, or take other recovery actions.
+            }
+    }
+    
+    public void demoMethod6() throws IOException{
+        System.out.println("This is demo method #6.");
+        
+        String fileName1 = "c:\\Prakash\\nonExistentFile.txt";
+        String fileName2 = "c:\\Prakash\\existentFile.txt";
+        
+         FileReader reader = new FileReader(fileName1);
+        //  FileReader reader = new FileReader(fileName2);
+    }
+    
+    public void demoMethod7() throws IOException{
+        System.out.println("This is demo method #7.");
+        
+        demoMethod6();
+    }
+    
+    public void demoMethod8(){
+        System.out.println("This is demo method #8.");
+        
+        try{
+            demoMethod6();
+        }catch(IOException e){
+            System.out.println("An I/O error occurred: " + e.getMessage());
+            // You can log the error, prompt the user, or take other recovery actions.            
+        }
+    }
+    
+    public void demoMethod9(){
+        System.out.println("This is demo method #9.");
+        
+        try{
+            demoMethod6();
+        }catch(IOException ioe){
+            System.out.println("An I/O error occurred: " + ioe.getMessage());
+            // You can log the error, prompt the user, or take other recovery actions.
+            ioe.printStackTrace();
+        }
+    }
+    
+    public void demoMethod10() throws IOException{
+        System.out.println("This is demo method #10.");
+        
+        try{
+            demoMethod6();
+        }catch(IOException e){
+            System.out.println("An I/O error occurred: " + e.getMessage());
+            throw e;
+            // You can log the error, prompt the user, or take other recovery actions.            
+        }
+    }
+    
+    public void demoMethod11(){
+        System.out.println("This is demo method #11.");
+        
+        try{
+            demoMethod1();
+            System.out.println("Method1 invoked successfully.");
+        }catch(ArithmeticException  ae){
+            System.out.println("An I/O error occurred: " + ae.getMessage());
+            // You can log the error, prompt the user, or take other recovery actions.
+        }finally{
+            System.out.println("Clean up after method1 invocation.");
+        }
+    }
+    
+    public void demoMethod12(){
+        System.out.println("This is demo method #12.");
+        
+        try{
+            demoMethod2();
+            System.out.println("Method2 invoked successfully. This shouldn't happen.");
+        }catch(ArithmeticException  ae){
+            System.out.println("An arithmetic error occurred: " + ae.getMessage());
+            // You can log the error, prompt the user, or take other recovery actions.
+            ae.printStackTrace();
+        }finally{
+            System.out.println("Clean up after method2 invocation.");
+        }
+    }
+    
+    public void demoMethod13(){
+        System.out.println("This is demo method #13.");
+        
+        try{
+            demoMethod1();
+            System.out.println("Method1 invoked successfully.");
+        }finally{
+            System.out.println("Clean up after method1 invocation.");
+        }
+    }
+    
+    public void demoMethod14(){
+        System.out.println("This is demo method #14.");
+        
+        try{
+            demoMethod2();
+            System.out.println("Method2 invoked successfully. This shouldn't happen.");
+        }finally{
+            System.out.println("Clean up after method2 invocation.");
+        }
+    }
+    
+    public void demoMethod15(){
+        System.out.println("This is demo method #15.");
+        
+        try {
+                int[] numbers = {1, 2, 3};
+                // This line can throw an ArrayIndexOutOfBoundsException
+
+            System.out.println(numbers[4]); 
+
+            // This line can throw an ArithmeticException
+            int result = 10 / 0; 
+            System.out.println(result);
+
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Caught an ArrayIndexOutOfBoundsException: " + e.getMessage());
+        } catch (ArithmeticException e) {
+            System.out.println("Caught an ArithmeticException: " + e.getMessage());
+        } catch (Exception e) { // Generic catch block for any other exceptions
+            System.out.println("Caught a generic Exception: " + e.getMessage());
+        } finally {
+            System.out.println("Finally block executed.");
+        }
+        System.out.println("Program continues after exception handling.");
+    }    
+    
+    public void demoMethod16() throws InsufficientFundsException{
+        System.out.println("This is demo method #16.");
+        
+        int amount =100, balance = 50;
+        
+        if (amount > balance) {
+            throw new InsufficientFundsException("Insufficient funds. Available balance: " + balance);
+        }
+        balance -= amount;
+        System.out.println("Withdrawal successful. New balance: " + balance);
+    }
+}
+
+
+class InsufficientFundsException extends Exception {
+    public InsufficientFundsException(String message) {
+        super(message);
+    }
+}  
+
+
+class BankException extends Exception {
+    public BankException(String message) {
+        super(message);
+    }
+}  
+
+class TransactionException  extends BankException {
+    public TransactionException(String message) {
+        super(message);
+    }
+}
+
+class AuditException  extends BankException {
+    public AuditException(String message) {
+        super(message);
+    }
+}
+
+class FundsException  extends TransactionException {
+    public FundsException(String message) {
+        super(message);
+    }
+} 
+
+class IncorrectAccountDetailsException  extends FundsException {
+    public IncorrectAccountDetailsException(String message) {
+        super(message);
+    }
+}
+
+class InadequateFundsException  extends FundsException {
+    public InadequateFundsException(String message) {
+        super(message);
+    }
+}
+
+class SignatureMismatchException  extends FundsException {
+    public SignatureMismatchException(String message) {
+        super(message);
+    }
+}
+
+abstract class GrandParent{
+    abstract public void treat() throws TransactionException;
+}
+
+class Parent extends  GrandParent{
+    public void treat(){
+        
+    }
+}
+
+class Child extends  Parent{
+    public void treat(){
+        
+    }
+}
+
+class GrandChild extends  Child{
+    public void treat(){
+        
+    }
+}
