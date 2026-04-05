@@ -5,7 +5,7 @@ import java.util.*;
 public class Question8 {
     public static void main(String[] args) {
         System.out.println(buildAllPalindrome("baba"));
-        System.out.print(buildAllPalindrome("ababceedddd"));
+        //System.out.print(buildAllPalindrome("ababceedddd"));
     }
     public static List<String> buildAllPalindrome(String string){
         int[] freq = new int[26];
