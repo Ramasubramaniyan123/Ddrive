@@ -15,7 +15,7 @@ public class MaxPathSum {
         int cols = board.get(0).size();
         int[][] dp = new int[rows][cols];
         for (int[] row : dp) Arrays.fill(row, Integer.MIN_VALUE);
-        dp[0][startCol] = board.get(0).get(startCol);
+        dp[0][startCol] = board.getFirst().get(startCol);
 
         for (int i = 1; i < rows; i++) {
             for(int j = 0;j < cols;j++){
@@ -28,16 +28,13 @@ public class MaxPathSum {
                     best = Math.max(best, dp[i-1][j+1]);
                 }
                 dp[i][j] = best + board.get(i).get(j);
-
             }
         }
         int ans = Integer.MIN_VALUE;
         for (int j = 0; j < cols; j++) {
             ans = Math.max(ans, dp[rows - 1][j]);
         }
-
         return ans;
-
     }
 
     public static int solveBottom(List<List<Integer>> board, int startCol) {
@@ -69,4 +66,5 @@ public class MaxPathSum {
         }
         return ans;
     }
+
 }
