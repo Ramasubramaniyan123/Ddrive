@@ -10,7 +10,7 @@ public class StringPractice {
         }
 
         for (int i = n - 1; i >= 0; i--) {
-            for (int j = i + 1; i < n; j++) {
+            for (int j = i + 1; j < n; j++) {
                 if (s.charAt(i) != s.charAt(j)) {
                     dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
                 } else {
