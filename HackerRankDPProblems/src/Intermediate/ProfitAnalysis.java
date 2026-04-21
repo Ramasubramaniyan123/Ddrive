@@ -12,10 +12,10 @@ public class ProfitAnalysis {
         long maxSum = Long.MIN_VALUE;
         for (int i = 1; i <= n; i++) {
             while (!dq.isEmpty() && dq.peekFirst() < i - k) dq.pollFirst();
-            if(!dq.isEmpty()) maxSum = Math.max(maxSum, prefix[i] - prefix[dq.peekFirst()]);
+            if (!dq.isEmpty()) maxSum = Math.max(maxSum, prefix[i] - prefix[dq.peekFirst()]);
             while (!dq.isEmpty() && prefix[dq.peekLast()] >= prefix[i]) dq.pollLast();
             dq.addLast(i);
         }
-        return Math.max(maxSum,0);
+        return Math.max(maxSum, 0);
     }
 }
