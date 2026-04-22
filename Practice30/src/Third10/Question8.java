@@ -17,7 +17,6 @@ class Question8 {
             map.putIfAbsent(nums[i], new ArrayList<>());
             map.get(nums[i]).add(i);
         }
-
         return result;
     }
 }

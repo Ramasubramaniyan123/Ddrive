@@ -35,8 +35,6 @@ public class WorkSchedule {
             return;
         }
 
-        // Pruning
-        int remainingSlots = qIndex.size() - pos;
 
         int index = qIndex.get(pos);
 
