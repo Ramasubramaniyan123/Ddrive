@@ -4,7 +4,7 @@ import java.util.*;
 
 public class SeriesSolver {
     public static String findOdd(List<String> series) {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> map = new TreeMap<>();
         for(String s: series){
             StringBuilder sb = new StringBuilder();
             for(int i = 0;i < s.length() - 1;i++){
