@@ -33,19 +33,19 @@ public class EmployeeBatchInsert {
         String sql = "INSERT INTO employee_batch (name, salary) VALUES (?, ?)";
 
         try (Connection con = DriverManager.getConnection(url, user, password);
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+             PreparedStatement preparedStatement = con.prepareStatement(sql)) {
 
             con.setAutoCommit(false);
 
             for (int i = 1; i <= 5000; i++) {
 
-                pstmt.setString(1, "Emp" + i);
-                pstmt.setDouble(2, 1000 + i);
+                preparedStatement.setString(1, "Emp" + i);
+                preparedStatement.setDouble(2, 1000 + i);
 
-                pstmt.addBatch();
+                preparedStatement.addBatch();
             }
 
-            pstmt.executeBatch();
+            preparedStatement.executeBatch();
 
             con.commit();
 

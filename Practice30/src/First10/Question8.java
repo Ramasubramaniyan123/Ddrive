@@ -4,8 +4,8 @@ import java.util.*;
 
 public class Question8 {
     public static void main(String[] args) {
-        System.out.println(buildAllPalindrome("baba"));
-        //System.out.print(buildAllPalindrome("ababceedddd"));
+        System.out.println(buildAllPalindrome("kkj"));
+        System.out.println(buildAllPalindrome("rammarr"));
     }
     public static List<String> buildAllPalindrome(String string){
         int[] freq = new int[26];
@@ -16,7 +16,7 @@ public class Question8 {
         int oddCount = 0;
         char middle = 0;
         for(int i = 0; i< 26;i++){
-            if(freq[i] %2 == 1) {
+            if(freq[i] % 2 == 1) {
                 oddCount ++;
                 middle = (char) (i + 'a');
             }
