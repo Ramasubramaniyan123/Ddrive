@@ -10,10 +10,8 @@ public class BankingApp {
     public static void main(String[] args) {
 
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-
         MenuUI menuUI = context.getBean(MenuUI.class);
         menuUI.start();
-
         context.close();
     }
 }

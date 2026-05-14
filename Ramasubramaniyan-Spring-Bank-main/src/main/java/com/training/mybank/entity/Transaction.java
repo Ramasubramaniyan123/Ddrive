@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
-public class TransactionEntity {
+public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,14 +14,14 @@ public class TransactionEntity {
 
     @ManyToOne
     @JoinColumn(name = "from_account_id")
-    private AccountEntity fromAccount;
+    private Account fromAccount;
 
     @ManyToOne
     @JoinColumn(name = "to_account_id")
-    private AccountEntity toAccount;
+    private Account toAccount;
 
     @Column(name = "transaction_type", nullable = false)
-    private String transactionType; // DEPOSIT, WITHDRAW, TRANSFER
+    private String transactionType;
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
@@ -48,19 +48,19 @@ public class TransactionEntity {
         this.id = id;
     }
 
-    public AccountEntity getFromAccount() {
+    public Account getFromAccount() {
         return fromAccount;
     }
 
-    public void setFromAccount(AccountEntity fromAccount) {
+    public void setFromAccount(Account fromAccount) {
         this.fromAccount = fromAccount;
     }
 
-    public AccountEntity getToAccount() {
+    public Account getToAccount() {
         return toAccount;
     }
 
-    public void setToAccount(AccountEntity toAccount) {
+    public void setToAccount(Account toAccount) {
         this.toAccount = toAccount;
     }
 

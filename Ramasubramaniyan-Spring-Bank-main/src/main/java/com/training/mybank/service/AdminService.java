@@ -1,10 +1,10 @@
 package com.training.mybank.service;
 
 
-import com.training.mybank.entity.AdminEntity;
-import com.training.mybank.entity.UserEntity;
-import com.training.mybank.entity.AccountEntity;
-import com.training.mybank.entity.TransactionEntity;
+import com.training.mybank.entity.Admin;
+import com.training.mybank.entity.User;
+import com.training.mybank.entity.Account;
+import com.training.mybank.entity.Transaction;
 import com.training.mybank.entity.Role;
 import com.training.mybank.entity.AccountStatus;
 import com.training.mybank.exception.BankingException;
@@ -48,8 +48,8 @@ public class AdminService {
     /* ---------- ADMIN AUTHENTICATION ---------- */
 
     @Transactional(readOnly = true)
-    public AdminEntity login(String username, String password) {
-        AdminEntity admin = adminRepository.findByUsername(username)
+    public Admin login(String username, String password) {
+        Admin admin = adminRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Invalid admin username"));
 
         if (!PasswordUtil.matches(password, admin.getPassword())) {
@@ -62,7 +62,7 @@ public class AdminService {
     }
 
     @Transactional
-    public AdminEntity registerAdmin(String username, String password, String secretCode) {
+    public Admin registerAdmin(String username, String password, String secretCode) {
         if (!username.startsWith("admin")) {
             throw new BankingException("Admin username must start with 'admin'");
         }
@@ -74,11 +74,11 @@ public class AdminService {
         }
 
         // No password validation as per requirements
-        AdminEntity admin = new AdminEntity();
+        Admin admin = new Admin();
         admin.setUsername(username);
         admin.setPassword(PasswordUtil.hash(password));
 
-        AdminEntity savedAdmin = adminRepository.save(admin);
+        Admin savedAdmin = adminRepository.save(admin);
         auditLogService.log(username, "ADMIN_REGISTERED", "New admin account created");
         return savedAdmin;
     }
@@ -91,14 +91,14 @@ public class AdminService {
         }
     }
 
-    public AdminEntity performAdminLogin(String username, String password) throws AuthenticationFailedException {
+    public Admin performAdminLogin(String username, String password) throws AuthenticationFailedException {
         return login(username, password);
     }
 
     /* ---------- USER MANAGEMENT ---------- */
 
     @Transactional
-    public UserEntity addUser(String adminUsername, String username, String password, String fullName, String email, BigDecimal initialBalance) {
+    public User addUser(String adminUsername, String username, String password, String fullName, String email, BigDecimal initialBalance) {
         if (userRepository.existsByUsername(username)) {
             throw new BankingException("Username already exists");
         }
@@ -109,17 +109,17 @@ public class AdminService {
         PasswordUtil.validateStrength(password);
 
         // Create user
-        UserEntity user = new UserEntity();
+        User user = new User();
         user.setUsername(username);
         user.setPassword(PasswordUtil.hash(password));
         user.setFullName(fullName);
         user.setEmail(email);
         user.setRole(Role.USER);
         user.setCreatedAt(LocalDateTime.now());
-        UserEntity savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         // Create account with initial balance
-        AccountEntity account = new AccountEntity();
+        Account account = new Account();
         account.setUsername(username);
         account.setBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
         account.setAccountNumber(generateAccountNumber());
@@ -137,10 +137,10 @@ public class AdminService {
 
     @Transactional
     public void deleteUser(String adminUsername, String username) {
-        UserEntity user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("User not found: " + username));
 
-        AccountEntity account = accountRepository.findByUsername(username).orElse(null);
+        Account account = accountRepository.findByUsername(username).orElse(null);
 
         // Delete account
         if (account != null) {
@@ -155,7 +155,7 @@ public class AdminService {
 
     @Transactional
     public void freezeUser(String adminUsername, String username) {
-        AccountEntity account = accountRepository.findByUsername(username)
+        Account account = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for user: " + username));
 
         if (account.getStatus() == AccountStatus.FROZEN) {
@@ -170,7 +170,7 @@ public class AdminService {
 
     @Transactional
     public void unfreezeUser(String adminUsername, String username) {
-        AccountEntity account = accountRepository.findByUsername(username)
+        Account account = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for user: " + username));
 
         if (account.getStatus() == AccountStatus.ACTIVE) {
@@ -187,11 +187,11 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public BankSummary getBankSummary() {
-        List<AccountEntity> allAccounts = accountRepository.findAll();
+        List<Account> allAccounts = accountRepository.findAll();
 
         BigDecimal totalBalance = allAccounts.stream()
                 .filter(account -> account.getStatus() == AccountStatus.ACTIVE)
-                .map(AccountEntity::getBalance)
+                .map(Account::getBalance)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         long totalUsers = userRepository.count();
@@ -204,19 +204,19 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public UserDetails getUserDetails(String username) {
-        UserEntity user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("User not found: " + username));
 
-        AccountEntity account = accountRepository.findByUsername(username)
+        Account account = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for user: " + username));
 
-        List<TransactionEntity> transactions = transactionRepository.findByAccountId(account.getId());
+        List<Transaction> transactions = transactionRepository.findByAccountId(account.getId());
 
         return new UserDetails(user, account, transactions);
     }
 
     @Transactional(readOnly = true)
-    public List<UserEntity> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -247,25 +247,25 @@ public class AdminService {
     }
 
     public static class UserDetails {
-        private final UserEntity user;
-        private final AccountEntity account;
-        private final List<TransactionEntity> transactions;
+        private final User user;
+        private final Account account;
+        private final List<Transaction> transactions;
 
-        public UserDetails(UserEntity user, AccountEntity account, List<TransactionEntity> transactions) {
+        public UserDetails(User user, Account account, List<Transaction> transactions) {
             this.user = user;
             this.account = account;
             this.transactions = transactions;
         }
 
-        public UserEntity getUser() {
+        public User getUser() {
             return user;
         }
 
-        public AccountEntity getAccount() {
+        public Account getAccount() {
             return account;
         }
 
-        public List<TransactionEntity> getTransactions() {
+        public List<Transaction> getTransactions() {
             return transactions;
         }
     }

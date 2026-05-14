@@ -2,9 +2,9 @@ package com.training.mybank.service;
 
 import com.training.mybank.repository.AccountRepository;
 import com.training.mybank.repository.TransactionRepository;
-import com.training.mybank.entity.AccountEntity;
+import com.training.mybank.entity.Account;
 import com.training.mybank.entity.AccountStatus;
-import com.training.mybank.entity.TransactionEntity;
+import com.training.mybank.entity.Transaction;
 import com.training.mybank.repository.UserRepository;
 import com.training.mybank.exception.InsufficientBalanceException;
 import com.training.mybank.exception.BankingException;
@@ -47,7 +47,7 @@ public class TransactionService {
     public void deposit(String username, BigDecimal amount) {
         validateAmount(amount);
 
-        AccountEntity account = findAccountByUsername(username);
+        Account account = findAccountByUsername(username);
         
         if (account.getStatus() == AccountStatus.FROZEN) {
             throw new BankingException("Account is frozen. Deposit not allowed.");
@@ -55,7 +55,7 @@ public class TransactionService {
         
         account.setBalance(account.getBalance().add(amount));
 
-        TransactionEntity tx = new TransactionEntity();
+        Transaction tx = new Transaction();
         tx.setToAccount(account);
         tx.setTransactionType("DEPOSIT");
         tx.setAmount(amount);
@@ -75,7 +75,7 @@ public class TransactionService {
     public void withdraw(String username, BigDecimal amount) {
         validateAmount(amount);
 
-        AccountEntity account = findAccountByUsername(username);
+        Account account = findAccountByUsername(username);
         
         if (account.getStatus() == AccountStatus.FROZEN) {
             throw new BankingException("Account is frozen. Withdrawal not allowed.");
@@ -87,7 +87,7 @@ public class TransactionService {
 
         account.setBalance(account.getBalance().subtract(amount));
 
-        TransactionEntity tx = new TransactionEntity();
+        Transaction tx = new Transaction();
         tx.setFromAccount(account);
         tx.setTransactionType("WITHDRAW");
         tx.setAmount(amount);
@@ -111,8 +111,8 @@ public class TransactionService {
 
         validateAmount(amount);
 
-        AccountEntity from = findAccountByUsername(fromUser);
-        AccountEntity to = findAccountByUsername(toUser);
+        Account from = findAccountByUsername(fromUser);
+        Account to = findAccountByUsername(toUser);
 
         if (from.getStatus() == AccountStatus.FROZEN) {
             throw new BankingException("Your account is frozen. Transfer not allowed.");
@@ -122,31 +122,32 @@ public class TransactionService {
             throw new BankingException("Recipient account is frozen. Transfer not allowed.");
         }
 
-        if (userRepository.findByUsername(toUser).isEmpty()) {
+        if (userRepository.findByUsername(toUser).isPresent()) {
+            if (from.getBalance().compareTo(amount) < 0) {
+                throw new InsufficientBalanceException("Insufficient balance");
+            }
+
+            from.setBalance(from.getBalance().subtract(amount));
+            to.setBalance(to.getBalance().add(amount));
+
+            Transaction tx = new Transaction();
+            tx.setFromAccount(from);
+            tx.setToAccount(to);
+            tx.setTransactionType("TRANSFER");
+            tx.setAmount(amount);
+            tx.setFromBalanceAfter(from.getBalance());
+            tx.setToBalanceAfter(to.getBalance());
+            tx.setBalanceAfter(from.getBalance());
+            tx.setRemarks("Transfer");
+
+            accountRepository.save(from);
+            accountRepository.save(to);
+            transactionRepository.save(tx);
+            auditLogService.log(fromUser, "TRANSFER", "Transferred " + amount + " to " + toUser);
+        } else {
             throw new BankingException("User not found with username: " + toUser);
         }
 
-        if (from.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientBalanceException("Insufficient balance");
-        }
-
-        from.setBalance(from.getBalance().subtract(amount));
-        to.setBalance(to.getBalance().add(amount));
-
-        TransactionEntity tx = new TransactionEntity();
-        tx.setFromAccount(from);
-        tx.setToAccount(to);
-        tx.setTransactionType("TRANSFER");
-        tx.setAmount(amount);
-        tx.setFromBalanceAfter(from.getBalance());
-        tx.setToBalanceAfter(to.getBalance());
-        tx.setBalanceAfter(from.getBalance());
-        tx.setRemarks("Transfer");
-
-        accountRepository.save(from);
-        accountRepository.save(to);
-        transactionRepository.save(tx);
-        auditLogService.log(fromUser, "TRANSFER", "Transferred " + amount + " to " + toUser);
     }
 
     /* -------- BALANCE -------- */
@@ -159,23 +160,23 @@ public class TransactionService {
     /* -------- TRANSACTION HISTORY -------- */
 
     @Transactional(readOnly = true)
-    public List<TransactionEntity> getTransactionHistory(String username) {
-        AccountEntity account = findAccountByUsername(username);
+    public List<Transaction> getTransactionHistory(String username) {
+        Account account = findAccountByUsername(username);
         return transactionRepository.findByAccountId(account.getId());
     }
 
     @Transactional(readOnly = true)
     public String exportTransactionHistory(String username) {
         try {
-            AccountEntity account = findAccountByUsername(username);
-            List<TransactionEntity> transactions = transactionRepository.findByAccountId(account.getId());
+            Account account = findAccountByUsername(username);
+            List<Transaction> transactions = transactionRepository.findByAccountId(account.getId());
             return TransactionExportUtil.exportToText(username, account.getId(), transactions);
         } catch (IOException e) {
             throw new BankingException("Failed to export transaction history: " + e.getMessage());
         }
     }
 
-    private AccountEntity findAccountByUsername(String username) {
+    private Account findAccountByUsername(String username) {
         return accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for username: " + username));
     }
@@ -195,7 +196,7 @@ public class TransactionService {
 
     /* ---------- UI HELPERS ---------- */
 
-    public AccountEntity getAccountByUsername(String username) throws BankingException {
+    public Account getAccountByUsername(String username) throws BankingException {
         return findAccountByUsername(username);
     }
 

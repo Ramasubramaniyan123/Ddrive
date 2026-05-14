@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "accounts")
-public class AccountEntity {
+public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,7 +35,6 @@ public class AccountEntity {
         this.status = status;
     }
 
-    // Convenience methods
     public boolean isFrozen() {
         return status == AccountStatus.FROZEN;
     }

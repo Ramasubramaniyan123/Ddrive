@@ -1,8 +1,8 @@
 package com.training.mybank.ui;
 
-import com.training.mybank.entity.AccountEntity;
-import com.training.mybank.entity.TransactionEntity;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.Account;
+import com.training.mybank.entity.Transaction;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.BankingException;
 import com.training.mybank.service.AuthService;
 import com.training.mybank.service.TransactionService;
@@ -180,8 +180,8 @@ public class UserMenuUI {
     }
 
     private void history(String username) {
-        List<TransactionEntity> transactions = transactionService.getTransactionHistory(username);
-        AccountEntity myAccount = transactionService.getAccountByUsername(username);
+        List<Transaction> transactions = transactionService.getTransactionHistory(username);
+        Account myAccount = transactionService.getAccountByUsername(username);
 
         if (transactions.isEmpty()) {
             System.out.println("\nℹ No transactions found in your history.");
@@ -196,7 +196,7 @@ public class UserMenuUI {
         System.out.println("-".repeat(80));
 
         int count = 1;
-        for (TransactionEntity tx : transactions) {
+        for (Transaction tx : transactions) {
             BigDecimal displayBalance = null;
 
             if (tx.getFromAccount() != null && tx.getFromAccount().getId().equals(myAccount.getId())) {
@@ -230,7 +230,7 @@ public class UserMenuUI {
     }
 
     private void viewProfile(String username) {
-        UserEntity user = userService.getProfile(username);
+        User user = userService.getProfile(username);
         System.out.println("\n========== MY PROFILE ==========");
         System.out.println("Username  : " + user.getUsername());
         System.out.println("Full Name : " + user.getFullName());

@@ -1,8 +1,8 @@
 package com.training.mybank.service;
 
-import com.training.mybank.entity.AccountEntity;
+import com.training.mybank.entity.Account;
 import com.training.mybank.entity.AccountStatus;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.InvalidRecoveryDetailsException;
 import com.training.mybank.repository.AccountRepository;
 import com.training.mybank.repository.UserRepository;
@@ -27,14 +27,14 @@ public class ForgotPasswordService {
 
     /* ---------- VERIFY RECOVERY DETAILS ---------- */
 
-    private UserEntity verifyRecoveryDetails(String username,
-            String email,
-            String accountNumber) {
+    private User verifyRecoveryDetails(String username,
+                                       String email,
+                                       String accountNumber) {
 
-        UserEntity user = userRepository.findByUsernameAndEmail(username, email)
+        User user = userRepository.findByUsernameAndEmail(username, email)
                 .orElseThrow(() -> new InvalidRecoveryDetailsException("Invalid username/email combination"));
 
-        AccountEntity account = accountRepository.findByUsernameAndAccountNumber(
+        Account account = accountRepository.findByUsernameAndAccountNumber(
                 username, accountNumber)
                 .orElseThrow(() -> new InvalidRecoveryDetailsException("Invalid username/account number combination"));
 
@@ -67,7 +67,7 @@ public class ForgotPasswordService {
         }
 
         try {
-            UserEntity user = verifyRecoveryDetails(
+            User user = verifyRecoveryDetails(
                     username, email, accountNumber);
 
             user.setPassword(PasswordUtil.hash(newPassword));

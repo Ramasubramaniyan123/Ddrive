@@ -8,7 +8,7 @@ import java.util.List;
 
 public class EmployeeService {
 
-    private EmployeeDAO employeeDAO = new EmployeeDAO();
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
 
     public void createEmployee(Employee employee) {
         employeeDAO.save(employee);

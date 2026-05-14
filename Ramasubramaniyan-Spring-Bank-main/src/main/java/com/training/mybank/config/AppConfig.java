@@ -53,7 +53,6 @@ public class AppConfig {
     private String showSql;
 
     @Bean
-    @NonNull
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(driverClassName);
@@ -66,8 +65,7 @@ public class AppConfig {
     }
 
     @Bean
-    @NonNull
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(@NonNull DataSource dataSource) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.training.mybank.entity");
@@ -85,7 +83,7 @@ public class AppConfig {
     }
 
     @Bean
-    public JpaTransactionManager transactionManager(@NonNull EntityManagerFactory emf) {
+    public JpaTransactionManager transactionManager(EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
 }

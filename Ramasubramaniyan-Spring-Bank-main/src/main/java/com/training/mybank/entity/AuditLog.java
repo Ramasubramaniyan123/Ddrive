@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "audit_logs")
-public class AuditLogEntity {
+public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,13 +23,12 @@ public class AuditLogEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public AuditLogEntity(String username, String action, String details) {
+    public AuditLog(String username, String action, String details) {
         this.username = username;
         this.action = action;
         this.details = details;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

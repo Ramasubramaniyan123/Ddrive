@@ -1,7 +1,7 @@
 package com.training.mybank.ui;
 
-import com.training.mybank.entity.AdminEntity;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.Admin;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.AuthenticationFailedException;
 import com.training.mybank.exception.BankingException;
 import com.training.mybank.exception.InvalidRecoveryDetailsException;
@@ -127,7 +127,7 @@ public class MainMenuUI {
             String password = scanner.nextLine();
 
             try {
-                AdminEntity admin = adminService.performAdminLogin(username, password);
+                Admin admin = adminService.performAdminLogin(username, password);
                 System.out.println("Login successful");
                 menuUI.openAdminMenu(admin.getUsername());
                 return; // Return to main menu after admin logout
@@ -139,7 +139,7 @@ public class MainMenuUI {
     }
 
     private void loginFlow() {
-        UserEntity user = login();
+        User user = login();
 
         if (user == null) {
             return;
@@ -149,7 +149,7 @@ public class MainMenuUI {
         menuUI.openUserMenu(user.getUsername());
     }
 
-    private UserEntity login() {
+    private User login() {
         while (true) {
             System.out.println("\n---- LOGIN ----");
 

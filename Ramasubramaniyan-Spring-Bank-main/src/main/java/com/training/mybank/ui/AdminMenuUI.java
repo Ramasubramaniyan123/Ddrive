@@ -1,9 +1,7 @@
 package com.training.mybank.ui;
 
-import com.training.mybank.entity.AdminEntity;
-import com.training.mybank.entity.AccountEntity;
-import com.training.mybank.entity.TransactionEntity;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.Transaction;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.BankingException;
 import com.training.mybank.service.AdminService;
 import com.training.mybank.service.AdminService.BankSummary;
@@ -96,7 +94,7 @@ public class AdminMenuUI {
         BigDecimal initialBalance = readBigDecimal();
 
         try {
-            UserEntity user = adminService.addUser(adminUsername, username, password, fullName, email, initialBalance);
+            User user = adminService.addUser(adminUsername, username, password, fullName, email, initialBalance);
             System.out.println("\n✓ User created successfully!");
             System.out.println("Username: " + user.getUsername());
             System.out.println("Initial Balance: " + initialBalance);
@@ -209,7 +207,7 @@ public class AdminMenuUI {
 
             // Display transaction history
             System.out.println("\n========== TRANSACTION HISTORY ==========");
-            List<TransactionEntity> transactions = details.getTransactions();
+            List<Transaction> transactions = details.getTransactions();
 
             if (transactions.isEmpty()) {
                 System.out.println("No transactions found.");
@@ -219,7 +217,7 @@ public class AdminMenuUI {
                 System.out.println("-".repeat(80));
 
                 int count = 1;
-                for (TransactionEntity tx : transactions) {
+                for (Transaction tx : transactions) {
                     BigDecimal displayBalance = null;
 
                     if (tx.getFromAccount() != null && tx.getFromAccount().getId().equals(details.getAccount().getId())) {
@@ -289,7 +287,7 @@ public class AdminMenuUI {
                 writer.println("==========================================");
                 writer.println();
 
-                List<TransactionEntity> transactions = details.getTransactions();
+                List<Transaction> transactions = details.getTransactions();
                 
                 if (transactions.isEmpty()) {
                     writer.println("No transactions found.");
@@ -299,7 +297,7 @@ public class AdminMenuUI {
                     writer.println("-".repeat(80));
 
                     int count = 1;
-                    for (TransactionEntity tx : transactions) {
+                    for (Transaction tx : transactions) {
                         BigDecimal displayBalance = null;
 
                         if (tx.getFromAccount() != null && tx.getFromAccount().getId().equals(details.getAccount().getId())) {

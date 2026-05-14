@@ -1,6 +1,6 @@
 package com.training.mybank.service;
 
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.BankingException;
 import com.training.mybank.repository.UserRepository;
 import com.training.mybank.util.PasswordUtil;
@@ -23,7 +23,7 @@ public class UserService {
 
     @Transactional
     public void changePassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword) {
-        UserEntity user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("User not found with username: " + username));
         if(PasswordUtil.matches(newPassword, user.getPassword())){
             auditLogService.log((username), "SAME_PASSWORD_ENTERED", "Why you came here to change password");
@@ -43,7 +43,7 @@ public class UserService {
     }
     @Transactional
     public void updateProfile(@NotBlank String username, String fullName, String email) {
-        UserEntity user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("User not found with username: " + username));
 
         if (fullName != null && !fullName.trim().isEmpty()) {
@@ -62,8 +62,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserEntity getProfile(@NotBlank String username) {
-        UserEntity user = userRepository.findByUsername(username)
+    public User getProfile(@NotBlank String username) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("User not found with username: " + username));
         return user;
     }

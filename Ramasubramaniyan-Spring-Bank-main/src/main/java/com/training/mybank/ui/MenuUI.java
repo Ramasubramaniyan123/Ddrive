@@ -1,11 +1,6 @@
 package com.training.mybank.ui;
 
-import com.training.mybank.service.AuthService;
-import com.training.mybank.service.RegistrationService;
-import com.training.mybank.service.ForgotPasswordService;
-import com.training.mybank.service.TransactionService;
-import com.training.mybank.service.AdminService;
-import com.training.mybank.service.UserService;
+import com.training.mybank.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +22,6 @@ public class MenuUI {
     private UserMenuUI userMenuUI;
     private AdminMenuUI adminMenuUI;
 
-    @Autowired
     public MenuUI(
             AuthService authService
             , RegistrationService registrationService
@@ -70,8 +64,6 @@ public class MenuUI {
         mainMenuUI.show();
         shutdown();
     }
-
-    /* ===== ROUTING ===== */
 
     public void openUserMenu(String username) {
         userMenuUI.show(username);

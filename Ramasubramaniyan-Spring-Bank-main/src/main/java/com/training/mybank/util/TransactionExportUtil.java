@@ -1,6 +1,6 @@
 package com.training.mybank.util;
 
-import com.training.mybank.entity.TransactionEntity;
+import com.training.mybank.entity.Transaction;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class TransactionExportUtil {
 
     private static final String EXPORT_DIR = "exports";
 
-    public static String exportToText(String username, Long accountId, List<TransactionEntity> transactions)
+    public static String exportToText(String username, Long accountId, List<Transaction> transactions)
             throws IOException {
         Path path = Paths.get(EXPORT_DIR);
         if (!Files.exists(path)) {
@@ -37,7 +37,7 @@ public class TransactionExportUtil {
                     "DATE/TIME", "TYPE", "AMOUNT", "BALANCE", "REMARKS");
             writer.println("--------------------------------------------------------------------------------");
 
-            for (TransactionEntity tx : transactions) {
+            for (Transaction tx : transactions) {
                 java.math.BigDecimal displayBalance = null;
 
                 if (tx.getFromAccount() != null && tx.getFromAccount().getId().equals(accountId)) {

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DepartmentService {
 
-    private DepartmentDAO departmentDAO = new DepartmentDAO();
+    private final DepartmentDAO departmentDAO = new DepartmentDAO();
 
     public void createDepartment(Department department) {
         departmentDAO.save(department);

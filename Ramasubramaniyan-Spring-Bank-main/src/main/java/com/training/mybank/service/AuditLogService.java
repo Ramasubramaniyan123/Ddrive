@@ -1,6 +1,6 @@
 package com.training.mybank.service;
 
-import com.training.mybank.entity.AuditLogEntity;
+import com.training.mybank.entity.AuditLog;
 import com.training.mybank.repository.AuditLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class AuditLogService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(String username, String action, String details) {
-        AuditLogEntity log = new AuditLogEntity(username, action, details);
+        AuditLog log = new AuditLog(username, action, details);
         auditLogRepository.save(log);
     }
 

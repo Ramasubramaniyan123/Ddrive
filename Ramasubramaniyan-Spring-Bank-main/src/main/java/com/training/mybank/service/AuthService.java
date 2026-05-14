@@ -1,7 +1,7 @@
 package com.training.mybank.service;
 
 import com.training.mybank.repository.UserRepository;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.AuthenticationFailedException;
 import com.training.mybank.util.PasswordUtil;
 import org.slf4j.Logger;
@@ -27,9 +27,9 @@ public class AuthService {
     /* ---------- LOGIN ---------- */
 
     @Transactional(readOnly = true)
-    public UserEntity login(String username, String password) {
+    public User login(String username, String password) {
 
-        UserEntity user = userRepository.findOptionalByUsername(username)
+        User user = userRepository.findOptionalByUsername(username)
                 .orElseThrow(() -> new AuthenticationFailedException("Invalid username: " + username));
 
         if (!PasswordUtil.matches(password, user.getPassword())) {
@@ -57,7 +57,7 @@ public class AuthService {
 
     /* ---------- UI HELPER ---------- */
 
-    public UserEntity performLogin(String username, String password) throws AuthenticationFailedException {
+    public User performLogin(String username, String password) throws AuthenticationFailedException {
         verifyUserExists(username);
         return login(username, password);
     }

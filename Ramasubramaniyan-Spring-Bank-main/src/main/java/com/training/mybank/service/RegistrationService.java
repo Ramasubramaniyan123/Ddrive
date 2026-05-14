@@ -3,8 +3,8 @@ package com.training.mybank.service;
 import com.training.mybank.entity.Role;
 import com.training.mybank.repository.AccountRepository;
 import com.training.mybank.repository.UserRepository;
-import com.training.mybank.entity.AccountEntity;
-import com.training.mybank.entity.UserEntity;
+import com.training.mybank.entity.Account;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.BankingException;
 import com.training.mybank.util.PasswordUtil;
 
@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
+
+import static com.training.mybank.repository.AccountRepository.RANDOM;
 
 @Service
 public class RegistrationService {
@@ -39,7 +41,7 @@ public class RegistrationService {
         validateInput(username, password, email);
 
         // Create user
-        UserEntity user = new UserEntity();
+        User user = new User();
         user.setUsername(username);
         user.setPassword(PasswordUtil.hash(password));
         user.setFullName(fullName);
@@ -49,13 +51,27 @@ public class RegistrationService {
         userRepository.save(user);
 
         // Create account
-        String accountNumber = accountRepository.generateUniqueAccountNumber();
-        AccountEntity account = new AccountEntity();
+        String accountNumber = generateUniqueAccountNumber();
+        Account account = new Account();
         account.setUsername(username);
         account.setAccountNumber(accountNumber);
         account.setBalance(BigDecimal.ZERO);
         accountRepository.save(account);
 
+        return accountNumber;
+    }
+     private String generateUniqueAccountNumber() {
+        int min = 10000000;
+        int max = 99999999;
+        String accountNumber;
+        while (true) {
+            int number = min + RANDOM.nextInt(max - min + 1);
+            accountNumber = String.valueOf(number);
+
+            if (!accountRepository.existsByAccountNumber(accountNumber)) {
+                break;
+            }
+        }
         return accountNumber;
     }
 
