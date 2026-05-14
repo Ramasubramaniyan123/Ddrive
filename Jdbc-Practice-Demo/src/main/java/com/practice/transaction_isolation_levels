@@ -1,0 +1,51 @@
+1️⃣ Dirty Read
+Definition: Reading data that another transaction has modified but not yet committed.
+
+Example:
+
+Transaction A: Updates balance = 5000 (but hasn’t committed yet).
+
+Transaction B: Reads balance = 5000.
+
+Transaction A then rolls back (so the real balance is still 3000).
+
+Transaction B has read a value that never truly existed → dirty read.
+
+👉 Problem: You might make decisions based on data that gets rolled back.
+
+2️⃣ Non-Repeatable Read
+Definition: Reading the same row twice in one transaction and getting different results because another transaction updated it in between.
+
+Example:
+
+Transaction A: Reads balance = 3000.
+
+Transaction B: Updates balance = 5000 and commits.
+
+Transaction A: Reads the same row again → now sees balance = 5000.
+
+The same query gave different results → non-repeatable read.
+
+👉 Problem: Your transaction cannot rely on stable values during its execution.
+
+3️⃣ Phantom Read
+Definition: When a transaction re-executes a query that returns a set of rows, and another transaction inserts/deletes rows that match the condition, so the second execution returns a different set.
+
+Example:
+
+Transaction A: Runs SELECT * FROM accounts WHERE balance > 4000 → gets 2 rows.
+
+Transaction B: Inserts a new account with balance = 4500 and commits.
+
+Transaction A: Runs the same query again → now gets 3 rows.
+
+The “phantom” new row appeared → phantom read.
+
+👉 Problem: The set of rows you’re working with changes unexpectedly.
+
+⚙️ Quick Summary
+Dirty Read → You read uncommitted data.
+
+Non-Repeatable Read → Same row gives different values.
+
+Phantom Read → Same query returns different sets of rows.
