@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="paymentServiceTarget" class="com.learning.spring.aspectxml.PaymentService"/>
+
+    <bean id="auditInterceptor" class="com.learning.spring.aspectxml.AuditInterceptor"/>
+
+    <bean id="paymentAdvisor" class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+        <property name="mappedName" value="makePayment"/>
+        <property name="advice" ref="auditInterceptor"/>
+    </bean>
+
+    <bean id="paymentService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="paymentServiceTarget"/>
+        <property name="interceptorNames">
+            <list>
+                <value>paymentAdvisor</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>
