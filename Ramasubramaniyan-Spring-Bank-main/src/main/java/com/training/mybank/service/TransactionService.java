@@ -8,15 +8,11 @@ import com.training.mybank.entity.Transaction;
 import com.training.mybank.repository.UserRepository;
 import com.training.mybank.exception.InsufficientBalanceException;
 import com.training.mybank.exception.BankingException;
-import com.training.mybank.util.TransactionExportUtil;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -163,17 +159,6 @@ public class TransactionService {
     public List<Transaction> getTransactionHistory(String username) {
         Account account = findAccountByUsername(username);
         return transactionRepository.findByAccountId(account.getId());
-    }
-
-    @Transactional(readOnly = true)
-    public String exportTransactionHistory(String username) {
-        try {
-            Account account = findAccountByUsername(username);
-            List<Transaction> transactions = transactionRepository.findByAccountId(account.getId());
-            return TransactionExportUtil.exportToText(username, account.getId(), transactions);
-        } catch (IOException e) {
-            throw new BankingException("Failed to export transaction history: " + e.getMessage());
-        }
     }
 
     private Account findAccountByUsername(String username) {

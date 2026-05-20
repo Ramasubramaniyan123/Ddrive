@@ -48,9 +48,9 @@ public class AppConfig {
 
         // Hibernate specific properties
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "none"); // create - Auto-create table,  create-drop - Drops the schema again when the SessionFactory & create table, update - update table, validate - thrpws an exception if mismatch
+        properties.setProperty("hibernate.hbm2ddl.auto", "create"); // create - Auto-create table,  create-drop - Drops the schema again when the SessionFactory & create table, update - update table, validate - thrpws an exception if mismatch
         //Change the dialect to suit your DB
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         properties.setProperty("hibernate.show_sql", "true"); // Log SQL for debugging
         em.setJpaProperties(properties);
 

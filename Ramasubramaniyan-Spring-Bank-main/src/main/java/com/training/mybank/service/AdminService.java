@@ -1,27 +1,28 @@
 package com.training.mybank.service;
 
 
-import com.training.mybank.entity.Admin;
-import com.training.mybank.entity.User;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.training.mybank.entity.Account;
-import com.training.mybank.entity.Transaction;
-import com.training.mybank.entity.Role;
 import com.training.mybank.entity.AccountStatus;
-import com.training.mybank.exception.BankingException;
+import com.training.mybank.entity.Admin;
+import com.training.mybank.entity.Role;
+import com.training.mybank.entity.Transaction;
+import com.training.mybank.entity.User;
 import com.training.mybank.exception.AuthenticationFailedException;
+import com.training.mybank.exception.BankingException;
 import com.training.mybank.repository.AccountRepository;
 import com.training.mybank.repository.AdminRepository;
 import com.training.mybank.repository.TransactionRepository;
 import com.training.mybank.repository.UserRepository;
 import com.training.mybank.util.PasswordUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AdminService {
@@ -45,16 +46,16 @@ public class AdminService {
         this.auditLogService = auditLogService;
     }
 
-    /* ---------- ADMIN AUTHENTICATION ---------- */
+
 
     @Transactional(readOnly = true)
     public Admin login(String username, String password) {
         Admin admin = adminRepository.findByUsername(username)
-                .orElseThrow(() -> new BankingException("Invalid admin username"));
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid admin username"));
 
         if (!PasswordUtil.matches(password, admin.getPassword())) {
             auditLogService.log(username, "ADMIN_LOGIN_FAILED", "Invalid password attempt");
-            throw new BankingException("Invalid password");
+            throw new AuthenticationFailedException("Incorrect password for admin: " + username);
         }
 
         auditLogService.log(username, "ADMIN_LOGIN_SUCCESS", "Admin logged in successfully");
@@ -73,7 +74,7 @@ public class AdminService {
             throw new BankingException("Username already exists");
         }
 
-        // No password validation as per requirements
+        
         Admin admin = new Admin();
         admin.setUsername(username);
         admin.setPassword(PasswordUtil.hash(password));
@@ -83,7 +84,7 @@ public class AdminService {
         return savedAdmin;
     }
 
-    /* ---------- ADMIN AUTHENTICATION HELPERS ---------- */
+   
 
     public void verifyAdminExists(String username) throws AuthenticationFailedException {
         if (!adminRepository.existsByUsername(username)) {
@@ -95,7 +96,22 @@ public class AdminService {
         return login(username, password);
     }
 
-    /* ---------- USER MANAGEMENT ---------- */
+    @Transactional
+    public void resetAdminPassword(String username, String secretCode,
+                                   String newPassword, String confirmPassword) {
+        if (!"ramadmin".equals(secretCode)) {
+            throw new BankingException("Invalid admin secret code");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new BankingException("Passwords do not match");
+        }
+        Admin admin = adminRepository.findByUsername(username)
+                .orElseThrow(() -> new BankingException("Admin not found: " + username));
+        admin.setPassword(PasswordUtil.hash(newPassword));
+        adminRepository.save(admin);
+        auditLogService.log(username, "ADMIN_PASSWORD_RESET", "Admin reset their password");
+    }
+
 
     @Transactional
     public User addUser(String adminUsername, String username, String password, String fullName, String email, BigDecimal initialBalance) {
@@ -108,7 +124,6 @@ public class AdminService {
 
         PasswordUtil.validateStrength(password);
 
-        // Create user
         User user = new User();
         user.setUsername(username);
         user.setPassword(PasswordUtil.hash(password));
@@ -118,7 +133,6 @@ public class AdminService {
         user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
 
-        // Create account with initial balance
         Account account = new Account();
         account.setUsername(username);
         account.setBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
@@ -131,8 +145,20 @@ public class AdminService {
         return savedUser;
     }
 
+    private static final Random RANDOM = new Random();
+
     private String generateAccountNumber() {
-        return "ACC" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        int min = 10000000;
+        int max = 99999999;
+        String accountNumber;
+        while (true) {
+            int number = min + RANDOM.nextInt(max - min + 1);
+            accountNumber = String.valueOf(number);
+            if (!accountRepository.existsByAccountNumber(accountNumber)) {
+                break;
+            }
+        }
+        return accountNumber;
     }
 
     @Transactional
@@ -142,12 +168,10 @@ public class AdminService {
 
         Account account = accountRepository.findByUsername(username).orElse(null);
 
-        // Delete account
         if (account != null) {
             accountRepository.delete(account);
         }
 
-        // Delete user
         userRepository.delete(user);
 
         auditLogService.log(adminUsername, "ADMIN_DELETE_USER", "Deleted user: " + username);
@@ -183,7 +207,6 @@ public class AdminService {
         auditLogService.log(adminUsername, "ADMIN_UNFREEZE_USER", "Unfrozen user account: " + username);
     }
 
-    /* ---------- BANK SUMMARY ---------- */
 
     @Transactional(readOnly = true)
     public BankSummary getBankSummary() {
@@ -219,8 +242,6 @@ public class AdminService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-
-    /* ---------- INNER CLASS FOR SUMMARY ---------- */
 
     public static class BankSummary {
         private final BigDecimal totalBalance;

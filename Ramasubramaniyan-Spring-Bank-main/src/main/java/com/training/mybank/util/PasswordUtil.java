@@ -1,14 +1,14 @@
 package com.training.mybank.util;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 public class PasswordUtil {
+
     public static String hash(String rawPassword) {
-        return BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        return rawPassword;
     }
 
-    public static boolean matches(String raw, String hashed) {
-        return BCrypt.checkpw(raw, hashed);
+    public static boolean matches(String raw, String stored) {
+        if (raw == null || stored == null) return false;
+        return raw.equals(stored);
     }
 
     public static void validateStrength(String password) {

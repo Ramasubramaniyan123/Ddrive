@@ -1,5 +1,7 @@
 package com.training.mybank.ui;
 
+import java.util.Scanner;
+
 import com.training.mybank.entity.Admin;
 import com.training.mybank.entity.User;
 import com.training.mybank.exception.AuthenticationFailedException;
@@ -7,10 +9,8 @@ import com.training.mybank.exception.BankingException;
 import com.training.mybank.exception.InvalidRecoveryDetailsException;
 import com.training.mybank.service.AdminService;
 import com.training.mybank.service.AuthService;
-import com.training.mybank.service.RegistrationService;
 import com.training.mybank.service.ForgotPasswordService;
-
-import java.util.Scanner;
+import com.training.mybank.service.RegistrationService;
 
 public class MainMenuUI {
 
@@ -77,9 +77,9 @@ public class MainMenuUI {
                     System.out.println("Invalid option.");
                     break;
             }
-
         }
     }
+
 
     private void adminRegister() {
         System.out.println("\n---- ADMIN REGISTRATION ----");
@@ -107,7 +107,7 @@ public class MainMenuUI {
 
             String username;
             while (true) {
-                System.out.print("Username: ");
+                System.out.print("Username (or 'exit' to go back): ");
                 username = scanner.nextLine();
 
                 if (username.trim().equalsIgnoreCase("exit")) {
@@ -128,34 +128,60 @@ public class MainMenuUI {
 
             try {
                 Admin admin = adminService.performAdminLogin(username, password);
-                System.out.println("Login successful");
+                System.out.println("Login successful!");
                 menuUI.openAdminMenu(admin.getUsername());
-                return; // Return to main menu after admin logout
+                return;
             } catch (AuthenticationFailedException e) {
                 System.out.println(e.getMessage());
-                System.out.println("Returning to username prompt...");
+
+                System.out.print("Forgot password? (yes/no): ");
+                String answer = scanner.nextLine().trim();
+                if (answer.equalsIgnoreCase("yes")) {
+                    adminForgotPassword(username);
+                } else {
+                    System.out.println("Returning to username prompt...");
+                }
             }
+        }
+    }
+
+    private void adminForgotPassword(String username) {
+        System.out.println("\n---- ADMIN FORGOT PASSWORD ----");
+        System.out.println("Username: " + username);
+
+        System.out.print("New Password: ");
+        String newPassword = scanner.nextLine();
+
+        System.out.print("Confirm Password: ");
+        String confirmPassword = scanner.nextLine();
+
+        System.out.print("Admin Secret Code: ");
+        String secretCode = scanner.nextLine();
+
+        try {
+            adminService.resetAdminPassword(username, secretCode, newPassword, confirmPassword);
+            System.out.println("Password reset successful! Please log in with your new password.");
+        } catch (BankingException e) {
+            System.out.println("Reset failed: " + e.getMessage());
         }
     }
 
     private void loginFlow() {
         User user = login();
-
         if (user == null) {
             return;
         }
-
-        System.out.println("Login successful");
+        System.out.println("Login successful!");
         menuUI.openUserMenu(user.getUsername());
     }
 
     private User login() {
         while (true) {
-            System.out.println("\n---- LOGIN ----");
+            System.out.println("\n---- USER LOGIN ----");
 
             String username;
             while (true) {
-                System.out.print("Username: ");
+                System.out.print("Username (or 'exit' to go back): ");
                 username = scanner.nextLine();
 
                 if (username.trim().equalsIgnoreCase("exit")) {
@@ -171,6 +197,7 @@ public class MainMenuUI {
                 }
             }
 
+
             System.out.print("Password: ");
             String password = scanner.nextLine();
 
@@ -178,7 +205,14 @@ public class MainMenuUI {
                 return authService.performLogin(username, password);
             } catch (AuthenticationFailedException e) {
                 System.out.println(e.getMessage());
-                System.out.println("Returning to username prompt...");
+
+                System.out.print("Forgot password? (yes/no): ");
+                String answer = scanner.nextLine().trim();
+                if (answer.equalsIgnoreCase("yes")) {
+                    userForgotPassword(username);
+                } else {
+                    System.out.println("Returning to username prompt...");
+                }
             }
         }
     }
@@ -202,17 +236,14 @@ public class MainMenuUI {
             String accNo = registrationService.registerUser(username, password, fullName, email);
             System.out.println("Registration successful!");
             System.out.println("Your account number is: " + accNo);
-
         } catch (BankingException e) {
             System.out.println("Registration failed: " + e.getMessage());
         }
     }
 
-    private void forgotPassword() {
+    private void userForgotPassword(String username) {
         System.out.println("\n---- FORGOT PASSWORD ----");
-
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
+        System.out.println("Username: " + username);
 
         System.out.print("Email: ");
         String email = scanner.nextLine();
@@ -229,9 +260,7 @@ public class MainMenuUI {
         try {
             forgotPasswordService.resetUserPassword(
                     username, email, accountNumber, newPassword, confirmPassword);
-
-            System.out.println("Password reset successful!");
-
+            System.out.println("Password reset successful! Please log in with your new password.");
         } catch (InvalidRecoveryDetailsException e) {
             System.out.println("Reset failed: " + e.getMessage());
         }

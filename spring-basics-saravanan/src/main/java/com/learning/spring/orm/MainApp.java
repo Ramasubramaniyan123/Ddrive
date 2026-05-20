@@ -12,9 +12,10 @@ public class MainApp {
 
         // 1. Save some users (Hibernate will auto-create the table due to hbm2ddl.auto=create)
         System.out.println("Saving users...");
-        //repo.save(new User("Felix", "secret123"));
-        //repo.save(new User("Dragon", "admin456"));
-
+        repo.save(new User("Felix", "secret123"));
+        repo.save(new User("Dragon", "admin456"));
+        repo.save(new User("John", "john123"));
+        repo.save(new User("Ram", "Ram5678"));
         // 2. Retrieve users
         System.out.println("\nReading users from database...");
         List<User> users = repo.findAll();

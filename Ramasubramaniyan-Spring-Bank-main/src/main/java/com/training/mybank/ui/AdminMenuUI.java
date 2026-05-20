@@ -30,8 +30,7 @@ public class AdminMenuUI {
             System.out.println("4. Unfreeze User");
             System.out.println("5. View Bank Details");
             System.out.println("6. View User Details");
-            System.out.println("7. Export Transaction History");
-            System.out.println("8. Logout");
+            System.out.println("7. Logout");
             System.out.print("Choose: ");
 
             int choice = readChoice();
@@ -58,9 +57,6 @@ public class AdminMenuUI {
                         viewUserDetails(adminUsername);
                         break;
                     case 7:
-                        exportTransactionHistory(adminUsername);
-                        break;
-                    case 8:
                         System.out.println("Admin logged out.");
                         return;
                     default:
@@ -191,7 +187,6 @@ public class AdminMenuUI {
         try {
             UserDetails details = adminService.getUserDetails(username);
 
-            // Display user profile
             System.out.println("\n========== USER PROFILE ==========");
             System.out.println("Username  : " + details.getUser().getUsername());
             System.out.println("Full Name : " + details.getUser().getFullName());
@@ -199,13 +194,11 @@ public class AdminMenuUI {
             System.out.println("Role      : " + details.getUser().getRole());
             System.out.println("Created   : " + details.getUser().getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-            // Display account balance
             System.out.println("\n========== ACCOUNT DETAILS ==========");
             System.out.println("Account Number: " + details.getAccount().getAccountNumber());
             System.out.println("Balance       : " + details.getAccount().getBalance());
             System.out.println("Status        : " + details.getAccount().getStatus());
 
-            // Display transaction history
             System.out.println("\n========== TRANSACTION HISTORY ==========");
             List<Transaction> transactions = details.getTransactions();
 
@@ -214,7 +207,6 @@ public class AdminMenuUI {
             } else {
                 System.out.printf("%-5s %-12s %-15s %-15s %-20s%n",
                         "NO", "TYPE", "AMOUNT", "BALANCE", "DATE");
-                System.out.println("-".repeat(80));
 
                 int count = 1;
                 for (Transaction tx : transactions) {
@@ -236,102 +228,10 @@ public class AdminMenuUI {
                             balanceStr,
                             formattedDate);
                 }
-                System.out.println("=".repeat(80));
             }
 
         } catch (BankingException e) {
             System.out.println("Error retrieving user details: " + e.getMessage());
-        }
-    }
-
-    private void exportTransactionHistory(String adminUsername) {
-        System.out.println("\n--- EXPORT TRANSACTION HISTORY ---");
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine().trim();
-        
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine().trim();
-
-        if (username.isEmpty() || accountNumber.isEmpty()) {
-            System.out.println("Username and account number cannot be empty.");
-            return;
-        }
-
-        try {
-            UserDetails details = adminService.getUserDetails(username);
-            
-            // Verify account number matches
-            if (!details.getAccount().getAccountNumber().equals(accountNumber)) {
-                System.out.println("Account number does not match the user's account.");
-                return;
-            }
-
-            // Generate filename with timestamp
-            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String filename = "exports/" + username + "_transactions_" + timestamp + ".txt";
-            
-            // Create exports directory if it doesn't exist
-            java.io.File exportsDir = new java.io.File("exports");
-            if (!exportsDir.exists()) {
-                exportsDir.mkdirs();
-            }
-
-            // Write transaction history to file
-            try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filename))) {
-                writer.println("========== TRANSACTION HISTORY ==========");
-                writer.println("Username: " + username);
-                writer.println("Account Number: " + accountNumber);
-                writer.println("Export Date: " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                writer.println("Current Balance: " + details.getAccount().getBalance());
-                writer.println("Account Status: " + details.getAccount().getStatus());
-                writer.println("==========================================");
-                writer.println();
-
-                List<Transaction> transactions = details.getTransactions();
-                
-                if (transactions.isEmpty()) {
-                    writer.println("No transactions found.");
-                } else {
-                    writer.printf("%-5s %-12s %-15s %-15s %-20s%n",
-                            "NO", "TYPE", "AMOUNT", "BALANCE", "DATE");
-                    writer.println("-".repeat(80));
-
-                    int count = 1;
-                    for (Transaction tx : transactions) {
-                        BigDecimal displayBalance = null;
-
-                        if (tx.getFromAccount() != null && tx.getFromAccount().getId().equals(details.getAccount().getId())) {
-                            displayBalance = tx.getFromBalanceAfter();
-                        } else if (tx.getToAccount() != null && tx.getToAccount().getId().equals(details.getAccount().getId())) {
-                            displayBalance = tx.getToBalanceAfter();
-                        }
-
-                        String balanceStr = (displayBalance != null) ? String.format("%.2f", displayBalance) : "N/A";
-                        String formattedDate = tx.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-                        writer.printf("%-5d %-12s %-15.2f %-15s %-20s%n",
-                                count++,
-                                tx.getTransactionType(),
-                                tx.getAmount(),
-                                balanceStr,
-                                formattedDate);
-                    }
-                    writer.println("=".repeat(80));
-                }
-                
-                writer.println();
-                writer.println("=== EXPORT SUMMARY ===");
-                writer.println("Total Transactions: " + transactions.size());
-                writer.println("Export completed by admin: " + adminUsername);
-            }
-
-            System.out.println("✓ Transaction history exported successfully!");
-            System.out.println("File saved as: " + filename);
-
-        } catch (BankingException e) {
-            System.out.println("Error exporting transaction history: " + e.getMessage());
-        } catch (java.io.IOException e) {
-            System.out.println("Error writing to file: " + e.getMessage());
         }
     }
 

@@ -40,7 +40,6 @@ public class RegistrationService {
 
         validateInput(username, password, email);
 
-        // Create user
         User user = new User();
         user.setUsername(username);
         user.setPassword(PasswordUtil.hash(password));
@@ -50,7 +49,6 @@ public class RegistrationService {
 
         userRepository.save(user);
 
-        // Create account
         String accountNumber = generateUniqueAccountNumber();
         Account account = new Account();
         account.setUsername(username);

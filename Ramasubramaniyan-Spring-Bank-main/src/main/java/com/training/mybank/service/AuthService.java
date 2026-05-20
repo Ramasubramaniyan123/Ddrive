@@ -4,8 +4,6 @@ import com.training.mybank.repository.UserRepository;
 import com.training.mybank.entity.User;
 import com.training.mybank.exception.AuthenticationFailedException;
 import com.training.mybank.util.PasswordUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
-    
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
 
@@ -23,8 +19,6 @@ public class AuthService {
         this.userRepository = userRepository;
         this.auditLogService = auditLogService;
     }
-
-    /* ---------- LOGIN ---------- */
 
     @Transactional(readOnly = true)
     public User login(String username, String password) {
@@ -41,11 +35,8 @@ public class AuthService {
         return user;
     }
 
-    /* ---------- LOGOUT ---------- */
-
     public void logout(String username) {
         auditLogService.log(username, "LOGOUT", "User logged out");
-        logger.info("User {} logged out", username);
     }
 
     @Transactional(readOnly = true)
@@ -54,8 +45,6 @@ public class AuthService {
             throw new AuthenticationFailedException("Invalid username: " + username);
         }
     }
-
-    /* ---------- UI HELPER ---------- */
 
     public User performLogin(String username, String password) throws AuthenticationFailedException {
         verifyUserExists(username);

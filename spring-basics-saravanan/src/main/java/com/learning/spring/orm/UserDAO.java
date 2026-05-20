@@ -22,7 +22,6 @@ public class UserDAO {
 
     public List<User> findAll() {
         // JPQL (Java Persistence Query Language) - query objects, not tables
-        return entityManager.createQuery("SELECT u FROM User u", User.class)
-                .getResultList();
+        return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
     }
 }

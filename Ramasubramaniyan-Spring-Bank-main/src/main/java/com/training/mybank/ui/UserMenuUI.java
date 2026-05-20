@@ -43,9 +43,8 @@ public class UserMenuUI {
             System.out.println("3. Transfer");
             System.out.println("4. Balance");
             System.out.println("5. History");
-            System.out.println("6. Export History");
-            System.out.println("7. My Profile");
-            System.out.println("8. Logout");
+            System.out.println("6. My Profile");
+            System.out.println("7. Logout");
             System.out.print("Choose: ");
 
             int choice = readChoice();
@@ -68,12 +67,9 @@ public class UserMenuUI {
                         history(username);
                         break;
                     case 6:
-                        exportHistory(username);
-                        break;
-                    case 7:
                         showProfileMenu(username);
                         break;
-                    case 8:
+                    case 7:
                         authService.logout(username);
                         return;
                     default:
@@ -188,12 +184,9 @@ public class UserMenuUI {
             return;
         }
 
-        System.out.println("\n" + "=".repeat(80));
         System.out.println("                         TRANSACTION HISTORY");
-        System.out.println("=".repeat(80));
         System.out.printf("%-5s %-12s %-15s %-15s %-20s%n",
                 "NO", "TYPE", "AMOUNT", "BALANCE", "DATE");
-        System.out.println("-".repeat(80));
 
         int count = 1;
         for (Transaction tx : transactions) {
@@ -214,18 +207,6 @@ public class UserMenuUI {
                     tx.getAmount(),
                     balanceStr,
                     formattedDate);
-        }
-
-        System.out.println("=".repeat(80));
-    }
-
-    private void exportHistory(String username) {
-        try {
-            String filePath = transactionService.exportTransactionHistory(username);
-            System.out.println("\nTransaction statement exported successfully!");
-            System.out.println("File saved at: " + filePath);
-        } catch (BankingException e) {
-            System.out.println("Export failed: " + e.getMessage());
         }
     }
 
