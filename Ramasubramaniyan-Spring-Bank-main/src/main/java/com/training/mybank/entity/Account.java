@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "accounts")
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,24 +24,15 @@ public class Account {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private AccountStatus status = AccountStatus.ACTIVE;
-
-    public AccountStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AccountStatus status) {
-        this.status = status;
-    }
+    @Column(name = "is_frozen", nullable = false)
+    private boolean frozen = false;
 
     public boolean isFrozen() {
-        return status == AccountStatus.FROZEN;
+        return frozen;
     }
 
     public void setFrozen(boolean frozen) {
-        this.status = frozen ? AccountStatus.FROZEN : AccountStatus.ACTIVE;
+        this.frozen = frozen;
     }
 
     public BigDecimal getBalance() {

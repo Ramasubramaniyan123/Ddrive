@@ -1,21 +1,20 @@
 package com.training.mybank.service;
 
-import com.training.mybank.entity.Role;
-import com.training.mybank.repository.AccountRepository;
-import com.training.mybank.repository.UserRepository;
-import com.training.mybank.entity.Account;
-import com.training.mybank.entity.User;
-import com.training.mybank.exception.BankingException;
-import com.training.mybank.util.PasswordUtil;
+import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.regex.Pattern;
-
+import com.training.mybank.entity.Account;
+import com.training.mybank.entity.Role;
+import com.training.mybank.entity.User;
+import com.training.mybank.exception.BankingException;
+import com.training.mybank.repository.AccountRepository;
 import static com.training.mybank.repository.AccountRepository.RANDOM;
+import com.training.mybank.repository.UserRepository;
+import com.training.mybank.util.PasswordUtil;
 
 @Service
 public class RegistrationService {
@@ -24,6 +23,24 @@ public class RegistrationService {
     private final AccountRepository accountRepository;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    private void validateEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new BankingException("Email cannot be empty");
+        }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new BankingException("Invalid email format");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new BankingException("Password cannot be empty");
+        }
+        if (password.length() < 4) {
+            throw new BankingException("Password must be at least 4 characters long");
+        }
+    }
 
     @Autowired
     public RegistrationService(UserRepository userRepository,
@@ -58,14 +75,13 @@ public class RegistrationService {
 
         return accountNumber;
     }
-     private String generateUniqueAccountNumber() {
+    private String generateUniqueAccountNumber() {
         int min = 10000000;
         int max = 99999999;
         String accountNumber;
         while (true) {
             int number = min + RANDOM.nextInt(max - min + 1);
             accountNumber = String.valueOf(number);
-
             if (!accountRepository.existsByAccountNumber(accountNumber)) {
                 break;
             }
@@ -83,16 +99,10 @@ public class RegistrationService {
         if (userRepository.existsByUsername(username)) {
             throw new BankingException("Username already exists");
         }
-        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
-            throw new BankingException("Invalid email format");
-        }
+        validatePassword(password);
+        validateEmail(email);
         if (userRepository.existsByEmail(email)) {
             throw new BankingException("Email already registered");
-        }
-        try {
-            PasswordUtil.validateStrength(password);
-        } catch (IllegalArgumentException e) {
-            throw new BankingException(e.getMessage());
         }
     }
 

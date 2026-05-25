@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen | Department Hub</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #131b2e;
+            --bg-card: rgba(22, 30, 53, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --color-primary: #06b6d4; /* Cyber Cyan */
+            --color-primary-hover: #0891b2;
+            --color-success: #10b981; /* Emerald */
+            --color-warning: #f59e0b; /* Amber */
+            --color-danger: #ef4444; /* Rose */
+            
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 40%);
+        }
+
+        /* Header / Navbar */
+        header {
+            background: rgba(19, 27, 46, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-success));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-badge {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--color-primary);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 100px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Container & Grid layout */
+        main {
+            flex: 1;
+            padding: 2.5rem 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .welcome-msg h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .welcome-msg p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            outline: none;
+            width: 280px;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+            color: #0b0f19;
+            font-weight: 600;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Glass Card Container */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(16px);
+            padding: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Custom Premium Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            vertical-align: middle;
+            transition: var(--transition);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .department-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(16, 185, 129, 0.2));
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .department-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .department-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-inactive {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        /* Table Action Buttons */
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-icon:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-icon.edit:hover {
+            color: var(--color-primary);
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(6, 182, 212, 0.08);
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--color-danger);
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .btn-icon.toggle:hover {
+            color: var(--color-success);
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .btn-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            stroke-width: 1.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Animation class for deleted / new rows */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); height: 0; padding: 0; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">D</div>
+            <div class="logo-title">Department Hub</div>
+            <span class="logo-badge">REST Engine</span>
+        </div>
+        <div class="header-links">
+            <a href="/h2-console" target="_blank" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem; vertical-align: middle;">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                H2 DB Console
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        
+        <!-- Dashboard Header / Control Bar -->
+        <div class="dashboard-header">
+            <div class="welcome-msg">
+                <h1>Department Directory</h1>
+                <p>Manage organizational units, monitor status, and configure department settings in real-time.</p>
+            </div>
+            
+            <div class="action-bar">
+                <div class="search-wrapper">
+                    <!-- Search Icon SVG -->
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="searchFilter" placeholder="Search departments by name...">
+                </div>
+                <a href="/" class="btn btn-secondary">
+                    <!-- Users Icon SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    View Users
+                </a>
+                <button class="btn btn-primary" onclick="window.location.href='/departments/create'">
+                    <!-- Add Icon SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Create Department
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="card">
+            <div class="table-responsive">
+                <table id="departmentTable">
+                    <thead>
+                        <tr>
+                            <th>Department Information</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departmentTableBody">
+                        <!-- Thymeleaf rendered list -->
+                        <tr th:each="department : ${departments}" th:id="'department-row-' + ${department.id}">
+                            <td>
+                                <div class="department-info">
+                                    <div class="avatar" th:text="${#strings.substring(department.name, 0, 1).toUpperCase()}">D</div>
+                                    <div>
+                                        <div class="department-name" th:text="${department.name}">Department Name</div>
+                                        <div class="department-description" th:text="${department.description}">Department Description</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:class="${department.active} ? 'badge badge-active' : 'badge badge-inactive'">
+                                    <span th:if="${department.active}">Active</span>
+                                    <span th:unless="${department.active}">Inactive</span>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a th:href="@{/departments/{id}(id=${department.id})}" 
+                                       class="btn-icon" 
+                                       title="View Details">
+                                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </a>
+                                    <a th:href="@{/departments/{id}/edit(id=${department.id})}" 
+                                       class="btn-icon edit" 
+                                       title="Edit Department">
+                                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </a>
+                                    <form th:action="@{/departments/{id}/toggle(id=${department.id})}" 
+                                          method="post" 
+                                          style="display: inline;">
+                                        <button type="submit" 
+                                                class="btn-icon toggle"
+                                                th:title="${department.active} ? 'Deactivate' : 'Activate'">
+                                            <svg th:if="${department.active}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                            <svg th:unless="${department.active}" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22,4 12,14.01 9,11.01"></polyline></svg>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/departments/{id}/delete(id=${department.id})}" 
+                                          method="post" 
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Are you sure you want to delete this department?')">
+                                        <button type="submit" 
+                                                class="btn-icon delete" 
+                                                title="Delete Department">
+                                            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Empty state if no departments -->
+                        <tr id="emptyRow" th:style="${#lists.isEmpty(departments)} ? '' : 'display: none;'">
+                            <td colspan="3">
+                                <div class="empty-state">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <h3>No departments found</h3>
+                                    <p>Start by creating your first department using the button above.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

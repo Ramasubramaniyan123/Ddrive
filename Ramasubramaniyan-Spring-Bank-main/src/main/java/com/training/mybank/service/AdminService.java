@@ -5,13 +5,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.training.mybank.entity.Account;
-import com.training.mybank.entity.AccountStatus;
 import com.training.mybank.entity.Admin;
 import com.training.mybank.entity.Role;
 import com.training.mybank.entity.Transaction;
@@ -115,14 +115,20 @@ public class AdminService {
 
     @Transactional
     public User addUser(String adminUsername, String username, String password, String fullName, String email, BigDecimal initialBalance) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new BankingException("Username cannot be empty");
+        }
         if (userRepository.existsByUsername(username)) {
             throw new BankingException("Username already exists");
         }
+        validatePassword(password);
+        validateEmail(email);
         if (userRepository.existsByEmail(email)) {
             throw new BankingException("Email already registered");
         }
-
-        PasswordUtil.validateStrength(password);
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new BankingException("Full name cannot be empty");
+        }
 
         User user = new User();
         user.setUsername(username);
@@ -137,12 +143,32 @@ public class AdminService {
         account.setUsername(username);
         account.setBalance(initialBalance != null ? initialBalance : BigDecimal.ZERO);
         account.setAccountNumber(generateAccountNumber());
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setFrozen(false);
         account.setCreatedAt(LocalDateTime.now());
         accountRepository.save(account);
 
         auditLogService.log(adminUsername, "ADMIN_ADD_USER", "Created user: " + username + " with balance: " + initialBalance);
         return savedUser;
+    }
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    private void validateEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new BankingException("Email cannot be empty");
+        }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new BankingException("Invalid email format");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new BankingException("Password cannot be empty");
+        }
+        if (password.length() < 4) {
+            throw new BankingException("Password must be at least 4 characters long");
+        }
     }
 
     private static final Random RANDOM = new Random();
@@ -182,11 +208,11 @@ public class AdminService {
         Account account = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for user: " + username));
 
-        if (account.getStatus() == AccountStatus.FROZEN) {
+        if (account.isFrozen()) {
             throw new BankingException("Account is already frozen");
         }
 
-        account.setStatus(AccountStatus.FROZEN);
+        account.setFrozen(true);
         accountRepository.save(account);
 
         auditLogService.log(adminUsername, "ADMIN_FREEZE_USER", "Frozen user account: " + username);
@@ -197,11 +223,11 @@ public class AdminService {
         Account account = accountRepository.findByUsername(username)
                 .orElseThrow(() -> new BankingException("Account not found for user: " + username));
 
-        if (account.getStatus() == AccountStatus.ACTIVE) {
+        if (!account.isFrozen()) {
             throw new BankingException("Account is not frozen");
         }
 
-        account.setStatus(AccountStatus.ACTIVE);
+        account.setFrozen(false);
         accountRepository.save(account);
 
         auditLogService.log(adminUsername, "ADMIN_UNFREEZE_USER", "Unfrozen user account: " + username);
@@ -213,13 +239,13 @@ public class AdminService {
         List<Account> allAccounts = accountRepository.findAll();
 
         BigDecimal totalBalance = allAccounts.stream()
-                .filter(account -> account.getStatus() == AccountStatus.ACTIVE)
+                .filter(account -> !account.isFrozen())
                 .map(Account::getBalance)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         long totalUsers = userRepository.count();
         long frozenUsers = allAccounts.stream()
-                .filter(account -> account.getStatus() == AccountStatus.FROZEN)
+                .filter(Account::isFrozen)
                 .count();
 
         return new BankSummary(totalBalance, totalUsers, frozenUsers);

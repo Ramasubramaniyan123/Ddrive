@@ -197,7 +197,7 @@ public class AdminMenuUI {
             System.out.println("\n========== ACCOUNT DETAILS ==========");
             System.out.println("Account Number: " + details.getAccount().getAccountNumber());
             System.out.println("Balance       : " + details.getAccount().getBalance());
-            System.out.println("Status        : " + details.getAccount().getStatus());
+            System.out.println("Status        : " + (details.getAccount().isFrozen() ? "FROZEN" : "ACTIVE"));
 
             System.out.println("\n========== TRANSACTION HISTORY ==========");
             List<Transaction> transactions = details.getTransactions();

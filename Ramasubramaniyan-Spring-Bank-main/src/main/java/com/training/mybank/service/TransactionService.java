@@ -3,7 +3,6 @@ package com.training.mybank.service;
 import com.training.mybank.repository.AccountRepository;
 import com.training.mybank.repository.TransactionRepository;
 import com.training.mybank.entity.Account;
-import com.training.mybank.entity.AccountStatus;
 import com.training.mybank.entity.Transaction;
 import com.training.mybank.repository.UserRepository;
 import com.training.mybank.exception.InsufficientBalanceException;
@@ -37,18 +36,16 @@ public class TransactionService {
         this.auditLogService = auditLogService;
     }
 
-    /* -------- DEPOSIT -------- */
-
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deposit(String username, BigDecimal amount) {
         validateAmount(amount);
 
         Account account = findAccountByUsername(username);
-        
-        if (account.getStatus() == AccountStatus.FROZEN) {
+
+        if (account.isFrozen()) {
             throw new BankingException("Account is frozen. Deposit not allowed.");
         }
-        
+
         account.setBalance(account.getBalance().add(amount));
 
         Transaction tx = new Transaction();
@@ -57,7 +54,7 @@ public class TransactionService {
         tx.setAmount(amount);
         tx.setFromBalanceAfter(account.getBalance());
         tx.setToBalanceAfter(account.getBalance());
-        tx.setBalanceAfter(account.getBalance()); // Set for compatibility
+        tx.setBalanceAfter(account.getBalance());
         tx.setRemarks("Deposit");
 
         accountRepository.save(account);
@@ -65,18 +62,16 @@ public class TransactionService {
         auditLogService.log(username, "DEPOSIT", "Deposited " + amount + " to account.");
     }
 
-    /* -------- WITHDRAW -------- */
-
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void withdraw(String username, BigDecimal amount) {
         validateAmount(amount);
 
         Account account = findAccountByUsername(username);
-        
-        if (account.getStatus() == AccountStatus.FROZEN) {
+
+        if (account.isFrozen()) {
             throw new BankingException("Account is frozen. Withdrawal not allowed.");
         }
-        
+
         if (account.getBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException("Insufficient balance");
         }
@@ -89,15 +84,13 @@ public class TransactionService {
         tx.setAmount(amount);
         tx.setFromBalanceAfter(account.getBalance());
         tx.setToBalanceAfter(account.getBalance());
-        tx.setBalanceAfter(account.getBalance()); // Set for compatibility
+        tx.setBalanceAfter(account.getBalance());
         tx.setRemarks("Withdraw");
 
         accountRepository.save(account);
         transactionRepository.save(tx);
         auditLogService.log(username, "WITHDRAW", "Withdrew " + amount + " from account.");
     }
-
-    /* -------- TRANSFER -------- */
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void transfer(String fromUser, String toUser, BigDecimal amount) {
@@ -110,11 +103,11 @@ public class TransactionService {
         Account from = findAccountByUsername(fromUser);
         Account to = findAccountByUsername(toUser);
 
-        if (from.getStatus() == AccountStatus.FROZEN) {
+        if (from.isFrozen()) {
             throw new BankingException("Your account is frozen. Transfer not allowed.");
         }
-        
-        if (to.getStatus() == AccountStatus.FROZEN) {
+
+        if (to.isFrozen()) {
             throw new BankingException("Recipient account is frozen. Transfer not allowed.");
         }
 
@@ -143,17 +136,12 @@ public class TransactionService {
         } else {
             throw new BankingException("User not found with username: " + toUser);
         }
-
     }
-
-    /* -------- BALANCE -------- */
 
     @Transactional(readOnly = true)
     public BigDecimal checkBalance(String username) {
         return findAccountByUsername(username).getBalance();
     }
-
-    /* -------- TRANSACTION HISTORY -------- */
 
     @Transactional(readOnly = true)
     public List<Transaction> getTransactionHistory(String username) {
@@ -176,13 +164,9 @@ public class TransactionService {
         if (amount.stripTrailingZeros().scale() > 0) {
             throw new BankingException("Amount must be a rounded whole number (no decimals allowed)");
         }
-
     }
-
-    /* ---------- UI HELPERS ---------- */
 
     public Account getAccountByUsername(String username) throws BankingException {
         return findAccountByUsername(username);
     }
-
 }

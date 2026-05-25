@@ -1,7 +1,6 @@
 package com.training.mybank.service;
 
 import com.training.mybank.entity.Account;
-import com.training.mybank.entity.AccountStatus;
 import com.training.mybank.entity.User;
 import com.training.mybank.exception.InvalidRecoveryDetailsException;
 import com.training.mybank.repository.AccountRepository;
@@ -39,7 +38,7 @@ public class ForgotPasswordService {
                 .orElseThrow(() -> new InvalidRecoveryDetailsException("Invalid username/account number combination"));
 
 
-        if (account.getStatus() == AccountStatus.FROZEN) {
+        if (account.isFrozen()) {
             throw new InvalidRecoveryDetailsException(
                     "Account is frozen. Password reset not allowed");
         }
@@ -61,17 +60,8 @@ public class ForgotPasswordService {
         }
 
         try {
-            PasswordUtil.validateStrength(newPassword);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidRecoveryDetailsException(e.getMessage());
-        }
-
-        try {
-            User user = verifyRecoveryDetails(
-                    username, email, accountNumber);
-
+            User user = verifyRecoveryDetails(username, email, accountNumber);
             user.setPassword(PasswordUtil.hash(newPassword));
-
         } catch (InvalidRecoveryDetailsException e) {
             throw e;
         } catch (Exception e) {
