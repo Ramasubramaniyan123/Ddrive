@@ -1,11 +1,9 @@
 package com.xcelevate.demo.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -15,4 +13,6 @@ public class UserResponse {
     private String email;
     private String role;
     private Boolean active;
+    private Long departmentId;
+    private String departmentName;
 }

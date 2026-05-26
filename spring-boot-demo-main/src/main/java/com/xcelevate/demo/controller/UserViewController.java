@@ -1,31 +1,54 @@
 package com.xcelevate.demo.controller;
 
-import com.xcelevate.demo.model.response.UserResponse;
-import com.xcelevate.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.xcelevate.demo.service.DepartmentService;
+import com.xcelevate.demo.service.UserService;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.stream.Collectors;
-
 @Controller
 public class UserViewController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService userService;
+    private final DepartmentService departmentService;
+
+    public UserViewController(UserService userService,
+                              DepartmentService departmentService) {
+
+        this.userService = userService;
+        this.departmentService = departmentService;
+    }
 
     @GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("users", userRepository.findAll().stream()
-                .map(user -> UserResponse.builder()
-                        .id(user.getId())
-                        .name(user.getName())
-                        .email(user.getEmail())
-                        .role(user.getRole())
-                        .active(user.getActive())
-                        .build())
-                .collect(Collectors.toList()));
+    public String homePage(Model model) {
+
+        model.addAttribute(
+                "users",
+                userService.getAllUsers()
+        );
+
+        model.addAttribute(
+                "departments",
+                departmentService.getAllDepartments()
+        );
+
+        return "index";
+    }
+
+    @GetMapping("/users")
+    public String usersPage(Model model) {
+
+        model.addAttribute(
+                "users",
+                userService.getAllUsers()
+        );
+
+        model.addAttribute(
+                "departments",
+                departmentService.getAllDepartments()
+        );
+
         return "index";
     }
 }

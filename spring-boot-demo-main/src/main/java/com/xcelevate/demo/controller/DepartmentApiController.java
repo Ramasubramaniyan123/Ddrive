@@ -1,98 +1,101 @@
 package com.xcelevate.demo.controller;
 
-import com.xcelevate.demo.entity.Department;
 import com.xcelevate.demo.model.request.DepartmentRequest;
 import com.xcelevate.demo.model.response.DepartmentResponse;
-import com.xcelevate.demo.repository.DepartmentRepository;
+import com.xcelevate.demo.service.DepartmentService;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/departments")
 public class DepartmentApiController {
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private final DepartmentService departmentService;
 
-    private DepartmentResponse convertToResponse(Department department) {
-        return DepartmentResponse.builder()
-                .id(department.getId())
-                .name(department.getName())
-                .description(department.getDescription())
-                .active(department.getActive())
-                .build();
+    public DepartmentApiController(DepartmentService departmentService) {
+        this.departmentService = departmentService;
     }
 
-    // READ: Get all departments (GET)
-    @GetMapping
-    public List<DepartmentResponse> getAllDepartments() {
-        return departmentRepository.findAll().stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
-
-    // READ: Get department by ID (GET)
-    @GetMapping("/{id}")
-    public ResponseEntity<DepartmentResponse> getDepartmentById(@PathVariable Long id) {
-        return departmentRepository.findById(id)
-                .map(dept -> ResponseEntity.ok(convertToResponse(dept)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // CREATE: Create new department (POST)
+    // Create Department
     @PostMapping
-    public ResponseEntity<?> createDepartment(@Valid @RequestBody DepartmentRequest departmentRequest) {
-        Department department = Department.builder()
-                .name(departmentRequest.getName())
-                .description(departmentRequest.getDescription())
-                .active(departmentRequest.getActive() == null || Boolean.TRUE.equals(departmentRequest.getActive()))
-                .build();
+    public ResponseEntity<DepartmentResponse> createDepartment(
+            @Valid @RequestBody DepartmentRequest request) {
 
-        Department savedDepartment = departmentRepository.save(department);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponse(savedDepartment));
+        return ResponseEntity.ok(
+                departmentService.createDepartment(request)
+        );
     }
 
-    // UPDATE: Full update (PUT)
+    // Get Department By Id
+    @GetMapping("/{id}")
+    public ResponseEntity<DepartmentResponse> getDepartmentById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                departmentService.getDepartmentById(id)
+        );
+    }
+
+    // Get All Departments
+    @GetMapping
+    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
+
+        return ResponseEntity.ok(
+                departmentService.getAllDepartments()
+        );
+    }
+
+    // Update Department
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDepartment(@PathVariable Long id, @Valid @RequestBody DepartmentRequest departmentDetails) {
-        return departmentRepository.findById(id)
-                .map(dept -> {
-                    dept.setName(departmentDetails.getName());
-                    dept.setDescription(departmentDetails.getDescription());
-                    if (departmentDetails.getActive() != null) {
-                        dept.setActive(departmentDetails.getActive());
-                    }
-                    Department updatedDept = departmentRepository.save(dept);
-                    return ResponseEntity.ok((Object) convertToResponse(updatedDept));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DepartmentResponse> updateDepartment(
+            @PathVariable Long id,
+            @Valid @RequestBody DepartmentRequest request) {
+
+        return ResponseEntity.ok(
+                departmentService.updateDepartment(id, request)
+        );
     }
 
-    // PARTIAL UPDATE: Toggle active status (PATCH)
+    // Toggle Department Status
     @PatchMapping("/{id}/toggle")
-    public ResponseEntity<DepartmentResponse> toggleDepartmentStatus(@PathVariable Long id) {
-        return departmentRepository.findById(id)
-                .map(dept -> {
-                    dept.setActive(!Boolean.TRUE.equals(dept.getActive()));
-                    Department updatedDept = departmentRepository.save(dept);
-                    return ResponseEntity.ok(convertToResponse(updatedDept));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DepartmentResponse> toggleDepartmentStatus(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                departmentService.toggleDepartmentStatus(id)
+        );
     }
 
-    // DELETE: Delete department (DELETE)
+    // Delete Department
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
-        if (departmentRepository.existsById(id)) {
-            departmentRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteDepartment(
+            @PathVariable Long id) {
+
+        departmentService.deleteDepartment(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // Search Departments + Pagination
+    @GetMapping("/search")
+    public ResponseEntity<Page<DepartmentResponse>> searchDepartments(
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(
+                departmentService.searchDepartments(name, pageable)
+        );
     }
 }

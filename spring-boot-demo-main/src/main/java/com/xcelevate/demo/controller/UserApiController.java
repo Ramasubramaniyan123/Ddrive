@@ -1,100 +1,91 @@
 package com.xcelevate.demo.controller;
 
-import com.xcelevate.demo.entity.User;
 import com.xcelevate.demo.model.request.UserRequest;
 import com.xcelevate.demo.model.response.UserResponse;
-import com.xcelevate.demo.repository.UserRepository;
+import com.xcelevate.demo.service.UserService;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserApiController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService userService;
 
-    private UserResponse convertToResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .active(user.getActive())
-                .build();
+    public UserApiController(UserService userService) {
+        this.userService = userService;
     }
 
-    // READ: Get all users (GET)
-    @GetMapping
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
-
-    // READ: Get user by ID (GET)
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        return userRepository.findById(id)
-                .map(user -> ResponseEntity.ok(convertToResponse(user)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // CREATE: Create new user (POST)
+    // Create User
     @PostMapping
-    public UserResponse createUser(@Valid @RequestBody UserRequest userRequest) {
-        User user = User.builder()
-                .name(userRequest.getName())
-                .email(userRequest.getEmail())
-                .role(userRequest.getRole())
-                .active(userRequest.getActive() != null ? userRequest.getActive() : true)
-                .build();
-        
-        User savedUser = userRepository.save(user);
-        return convertToResponse(savedUser);
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody UserRequest request) {
+
+        return ResponseEntity.ok(userService.createUser(request));
     }
 
-    // UPDATE: Full update (PUT)
+    // Get User By Id
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    // Get All Users
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    // Update User
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequest userDetails) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setName(userDetails.getName());
-                    user.setEmail(userDetails.getEmail());
-                    user.setRole(userDetails.getRole());
-                    if (userDetails.getActive() != null) {
-                        user.setActive(userDetails.getActive());
-                    }
-                    User updatedUser = userRepository.save(user);
-                    return ResponseEntity.ok(convertToResponse(updatedUser));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRequest request) {
+
+        return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
-    // PARTIAL UPDATE: Toggle status (PATCH)
+    // Toggle User Status
     @PatchMapping("/{id}/toggle")
-    public ResponseEntity<UserResponse> toggleUserStatus(@PathVariable Long id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setActive(!user.getActive());
-                    User updatedUser = userRepository.save(user);
-                    return ResponseEntity.ok(convertToResponse(updatedUser));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserResponse> toggleUserStatus(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(userService.toggleUserStatus(id));
     }
 
-    // DELETE: Delete user (DELETE)
+    // Delete User
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id) {
+
+        userService.deleteUser(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // Search Users + Pagination
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserResponse>> searchUsers(
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(
+                userService.searchUsers(name, pageable)
+        );
     }
 }

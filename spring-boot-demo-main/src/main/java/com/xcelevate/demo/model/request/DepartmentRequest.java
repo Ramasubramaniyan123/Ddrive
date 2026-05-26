@@ -1,12 +1,10 @@
 package com.xcelevate.demo.model.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,5 +14,6 @@ public class DepartmentRequest {
 
     @NotBlank(message = "Department description is required")
     private String description;
+
     private Boolean active;
 }
